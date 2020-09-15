@@ -20,8 +20,8 @@ import numpy as np
 import cv2
 import imutils
 import pyautogui
-from directkeys1 import  up, left, down, right
-from directkeys1 import PressKey, ReleaseKey
+from directkeys import  up, left, down, right
+from directkeys import PressKey, ReleaseKey
 
 # write the range of lower and upper boundaries of the "blue" object after converting it to hsv region
 blueLower = np.array([50,50,50])
@@ -71,13 +71,15 @@ while True:
     right_cover = cover[:,width//2:,]
 
     #contours in the left and right frame to find the shape outline of the object for left side
-    contour_l = cv2.findContours(left_cover.copy(), cv2.RETR_EXTERNAL,
+    contour_l = cv2.findContours(left_cover.copy(),
+        cv2.RETR_EXTERNAL,
         cv2.CHAIN_APPROX_SIMPLE)
     contour_l = imutils.grab_contours(contour_l)
     left_centre = None
 #RETR_EXTERNAL is for exctracting only outer contour in heirarchy and we use CHAIN_APPROX_SIMPLE here to detect only main point of contour instead of all boundary point
 #https://docs.opencv.org/3.4/d9/d8b/tutorial_py_contours_hierarchy.html you can visit this site also for the same
-    contour_r = cv2.findContours(right_cover.copy(), cv2.RETR_EXTERNAL,
+    contour_r = cv2.findContours(right_cover.copy(),
+        cv2.RETR_EXTERNAL,
         cv2.CHAIN_APPROX_SIMPLE)
     contour_r = imutils.grab_contours(contour_r)
     right_centre = None
