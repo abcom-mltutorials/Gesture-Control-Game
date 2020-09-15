@@ -15,7 +15,6 @@
 # ==============================================================================
 
 
-
 #documentation of ctype is given on below link
 #https://docs.python.org/dev/library/ctypes.html?highlight=s#pointers
 import ctypes

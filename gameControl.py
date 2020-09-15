@@ -160,7 +160,6 @@ while True:
     if k == ord("q"):
         break
 
-
 video.stop()
 # close all windows when you will stop capturing video
 cv2.destroyAllWindows()
