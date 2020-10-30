@@ -14,20 +14,20 @@
 # ==============================================================================
 
 
-from imutils.video import VideoStream
+
 import numpy as np
 
 import cv2
-import imutils
+
 import pyautogui
-from directkeys import  up, left, down, right
-from directkeys import PressKey, ReleaseKey
+from directKeys import  up, left, down, right
+from directKeys import PressKey, ReleaseKey
 
 # write the range of lower and upper boundaries of the "blue" object after converting it to hsv region
 blueLower = np.array([50,50,50])
 blueUpper = np.array([180,180,155])
 #declare a variable to capture the real time video of our webcam
-video = VideoStream(src=0).start();
+video = cv2.VideoCapture(0); 
 
 #set the initial values for parameter to use them later in the code
 current_key = set()
@@ -40,7 +40,7 @@ while True:
     keyPressed = False
     keyPressed_lr= False
     # to grab the current frame from webcam
-    grabbed_frame = video.read()
+    _, grabbed_frame = video.read()
     height,width = grabbed_frame.shape[:2]
     '''GaussianBlur	(	InputArray 	src,
                         OutputArray 	dst,
@@ -52,7 +52,9 @@ while True:
     #the official documentation where you will find the purpose of each element in detail is in below comment
     #https://docs.opencv.org/3.1.0/d4/d86/group__imgproc__filter.html#gaabe8c836e97159a9193fb0b11ac52cf1
     # blur the captured image to make the image smooth and then convert it in hsv color
-    grabbed_frame = imutils.resize(grabbed_frame, width=600)
+    #grabbed_frame = imutils.resize(grabbed_frame, width=600)
+    
+    grabbed_frame = cv2.resize(grabbed_frame, dsize=(600, height))
     blur_frame = cv2.GaussianBlur(grabbed_frame, (11, 11), 0)
     hsv_value = cv2.cvtColor(blur_frame, cv2.COLOR_BGR2HSV)
 
@@ -63,6 +65,7 @@ while True:
     cover = cv2.erode(cover, None, iterations=2)
     #Dilate the resultant image
     cover = cv2.dilate(cover, None, iterations=2)
+    
 
 
     # here we will divide the frame into two halves one for up and down keys
@@ -70,18 +73,36 @@ while True:
     left_cover = cover[:,0:width//2,]
     right_cover = cover[:,width//2:,]
 
+    #define a function to extract the countours from the list 
+    def extract_contour(contours):
+        if len(contours) == 2:
+            contours = contours[0]
+            
+        elif len(contours) == 3:
+            contours = contours[1]
+
+        else:
+            raise Exception(("Contours tuple must have length 2 or 3," 
+            "otherwise OpenCV changed their cv2.findContours return "
+            "signature. Refer to OpenCV's documentation "
+            "in that case"))
+
+        return contours
+            
     #contours in the left and right frame to find the shape outline of the object for left side
     contour_l = cv2.findContours(left_cover.copy(),
         cv2.RETR_EXTERNAL,
         cv2.CHAIN_APPROX_SIMPLE)
-    contour_l = imutils.grab_contours(contour_l)
+    #use the defined function to extract from contour_l
+    contour_l = extract_contour(contour_l)
     left_centre = None
 #RETR_EXTERNAL is for exctracting only outer contour in heirarchy and we use CHAIN_APPROX_SIMPLE here to detect only main point of contour instead of all boundary point
 #https://docs.opencv.org/3.4/d9/d8b/tutorial_py_contours_hierarchy.html you can visit this site also for the same
     contour_r = cv2.findContours(right_cover.copy(),
         cv2.RETR_EXTERNAL,
         cv2.CHAIN_APPROX_SIMPLE)
-    contour_r = imutils.grab_contours(contour_r)
+    #use the defined function to extract from contour_r
+    contour_r = extract_contour(contour_r)
     right_centre = None
 
     # start looping if at least one contour or centre is found in left side of frame
